@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.List;
 
 /**
  *
@@ -12,7 +13,11 @@ import java.nio.charset.Charset;
  */
 public interface FileStoreDB {
 
-    public void initializeDB() throws Exception;
+    SafeOpt<List<ResourceMetadata>> getAll();
+
+    SafeOpt<List<ResourceMetadata>> search(ResourceSearchableData search);
+    
+    SafeOpt<List<ResourceMetadata>> searchContains(ResourceSearchableData search);
 
     SafeOpt<ResourceMetadata> find(String uri);
 
@@ -21,16 +26,17 @@ public interface FileStoreDB {
     default SafeOpt<InputStreamReader> openString(String uri) {
         return open(uri).map(stream -> new InputStreamReader(stream, Charset.defaultCharset()));
     }
-    
+
     default SafeOpt<InputStreamReader> openString(String uri, Charset charset) {
         return open(uri).map(stream -> new InputStreamReader(stream, charset));
     }
 
     /**
      * Returns ID
+     *
      * @param metadata
      * @param content
-     * @return 
+     * @return
      */
     SafeOpt put(ResourceMetadata metadata, InputStream content);
 

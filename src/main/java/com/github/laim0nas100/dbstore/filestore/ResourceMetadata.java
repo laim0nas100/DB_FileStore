@@ -1,32 +1,25 @@
 package com.github.laim0nas100.dbstore.filestore;
 
+import java.util.Map;
+import java.util.Objects;
 
 /**
  *
  * @author laim0nas100
  */
-public class ResourceMetadata {
+public class ResourceMetadata extends ResourceSearchableData {
 
     protected Object id;
     protected String uri;
-    protected String name;
-    protected String description;
-    protected String mimeType;
-    protected String additional_info;
     protected long size;
 
     public ResourceMetadata() {
     }
 
-    
-    
     public ResourceMetadata(Object id, String uri, String name, String description, String mimeType, String additional_info, long size) {
+        super(name, description, mimeType, additional_info);
         this.id = id;
         this.uri = uri;
-        this.name = name;
-        this.description = description;
-        this.mimeType = mimeType;
-        this.additional_info = additional_info;
         this.size = size;
     }
 
@@ -46,38 +39,6 @@ public class ResourceMetadata {
         this.uri = uri;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
-    }
-
-    public String getAdditional_info() {
-        return additional_info;
-    }
-
-    public void setAdditional_info(String additional_info) {
-        this.additional_info = additional_info;
-    }
-
     public long getSize() {
         return size;
     }
@@ -85,8 +46,50 @@ public class ResourceMetadata {
     public void setSize(long size) {
         this.size = size;
     }
-    
-    
-    
-    
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 47 * hash + Objects.hashCode(this.id);
+        hash = 47 * hash + Objects.hashCode(this.uri);
+        hash = 47 * hash + (int) (this.size ^ (this.size >>> 32));
+        hash = 47 * hash + super.hashCode();
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof ResourceMetadata) {
+            final ResourceMetadata other = (ResourceMetadata) obj;
+            if (this.size != other.size) {
+                return false;
+            }
+            if (!Objects.equals(this.uri, other.uri)) {
+                return false;
+            }
+            if (!Objects.equals(this.id, other.id)) {
+                return false;
+            }
+            return super.equals(obj);
+        } else {
+            return false;
+        }
+
+    }
+
+    @Override
+    public Map<String, Object> asValueMap() {
+        Map<String, Object> valueMap = super.asValueMap();
+        putIfPresent(valueMap, "id", getId());
+        putIfPresent(valueMap, "uri", getUri());
+        putIfPresent(valueMap, "size", getSize());
+        return valueMap;
+    }
+
 }

@@ -7,9 +7,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.Query;
 
 /**
  *
@@ -29,6 +33,133 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
         this.jdbi = jdbi;
         this.metaName = Objects.requireNonNull(metaName);
         this.blobName = Objects.requireNonNull(blobName);
+    }
+
+    @Override
+    public SafeOpt<List<ResourceMetadata>> getAll() {
+        return safeHandle(handle -> {
+            return handle.createQuery(formatted("SELECT id,uri,name,description,mime_type,additional_info,size FROM %s ", metaName))
+                    .map((rs, ctx) -> new ResourceMetadata(
+                            rs.getObject("id"),
+                            rs.getString("uri"),
+                            rs.getString("name"),
+                            rs.getString("description"),
+                            rs.getString("mime_type"),
+                            rs.getString("additional_info"),
+                            rs.getLong("size")
+                    )).list();
+        });
+    }
+
+    @Override
+    public SafeOpt<List<ResourceMetadata>> search(ResourceSearchableData search) {
+        return safeHandle(handle -> {
+            Map<String, String> searchableFields = search.searchableData();
+
+            StringBuilder where = new StringBuilder();
+            if (!searchableFields.isEmpty()) {
+                where.append(" WHERE ");
+                boolean first = true;
+                for (Map.Entry<String, String> entry : searchableFields.entrySet()) {
+                    String n = entry.getKey();
+                    if (first) {
+                        first = false;
+                        where.append(formatted(" %s=:%s", n, n));
+
+                    } else {
+                        where.append(formatted(" and %s=:%s", n, n));
+                    }
+                }
+            }
+
+            Query query = handle.createQuery(formatted("SELECT id,uri,name,description,mime_type,additional_info,size FROM %s ", metaName) + where.toString());
+            if (!searchableFields.isEmpty()) {
+                for (Map.Entry<String, String> entry : searchableFields.entrySet()) {
+                    query.bind(entry.getKey(), entry.getValue());
+                }
+
+            }
+
+            return query.map((rs, ctx) -> new ResourceMetadata(
+                    rs.getObject("id"),
+                    rs.getString("uri"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getString("mime_type"),
+                    rs.getString("additional_info"),
+                    rs.getLong("size")
+            )).list();
+        }, search);
+    }
+
+    @Override
+    public SafeOpt<List<ResourceMetadata>> searchContains(
+            ResourceSearchableData search) {
+
+        return safeHandle(handle -> {
+            Map<String, String> searchableFields
+                    = search.searchableData();
+
+            StringBuilder where = new StringBuilder();
+
+            if (!searchableFields.isEmpty()) {
+                where.append(" WHERE ");
+
+                boolean first = true;
+
+                for (Map.Entry<String, String> entry: searchableFields.entrySet()) {
+
+                    if (!first) {
+                        where.append(" AND ");
+                    }
+
+                    String name = entry.getKey();
+
+                    where.append(
+                            formatted(
+                                    "%s LIKE :%s ESCAPE '\\'",
+                                    name,
+                                    name
+                            )
+                    );
+
+                    first = false;
+                }
+            }
+
+            Query query = handle.createQuery(
+                    "SELECT id,uri,name,description,mime_type,"
+                    + "additional_info,size "
+                    + formatted("FROM %s", metaName)
+                    + where
+            );
+
+            for (Map.Entry<String, String> entry : searchableFields.entrySet()) {
+
+                query.bind(
+                        entry.getKey(),
+                        "%" + escapeLike(entry.getValue()) + "%"
+                );
+            }
+
+            return query.map((rs, ctx) -> new ResourceMetadata(
+                    rs.getObject("id"),
+                    rs.getString("uri"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getString("mime_type"),
+                    rs.getString("additional_info"),
+                    rs.getLong("size")
+            )).list();
+
+        }, search);
+    }
+
+    private static String escapeLike(String value) {
+        return value
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
     }
 
     @Override

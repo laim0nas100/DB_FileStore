@@ -1,6 +1,7 @@
 package com.github.laim0nas100.dbstore.filestore;
 
 import com.github.laim0nas100.uncheckedutils.SafeOpt;
+import java.sql.SQLException;
 import org.jdbi.v3.core.Jdbi;
 
 /**
@@ -9,18 +10,17 @@ import org.jdbi.v3.core.Jdbi;
  */
 public class SqliteFileStore extends JdbiFileStoreDB {
 
-    public SqliteFileStore(Jdbi jdbi) throws Exception {
+    public SqliteFileStore(Jdbi jdbi) throws SQLException {
         super(jdbi);
         initializeDB();
     }
 
-    public SqliteFileStore(Jdbi jdbi, String metaName, String blobName) throws Exception {
+    public SqliteFileStore(Jdbi jdbi, String metaName, String blobName) throws SQLException {
         super(jdbi, metaName, blobName);
         initializeDB();
     }
 
-    @Override
-    public void initializeDB() throws Exception {
+    public void initializeDB() throws SQLException {
 
         String createMetaTable
                 = formatted("CREATE TABLE %s(\n", metaName)

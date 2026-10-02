@@ -5,7 +5,7 @@ import org.jdbi.v3.core.Jdbi;
 
 /**
  *
- * @author Lemmin
+ * @author laim0nas100
  */
 public class SqliteFileStore extends JdbiFileStoreDB {
 

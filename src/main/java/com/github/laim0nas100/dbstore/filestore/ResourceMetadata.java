@@ -3,7 +3,7 @@ package com.github.laim0nas100.dbstore.filestore;
 
 /**
  *
- * @author Lemmin
+ * @author laim0nas100
  */
 public class ResourceMetadata {
 

@@ -8,7 +8,7 @@ import java.nio.charset.Charset;
 
 /**
  *
- * @author Lemmin
+ * @author laim0nas100
  */
 public interface FileStoreDB {
 

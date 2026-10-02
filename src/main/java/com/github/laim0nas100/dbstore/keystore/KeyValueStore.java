@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 /**
  *
- * @author Lemmin
+ * @author laim0nas100
  */
 public interface KeyValueStore {
 

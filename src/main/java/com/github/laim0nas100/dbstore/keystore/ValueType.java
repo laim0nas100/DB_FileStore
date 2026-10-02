@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 /**
  *
- * @author Lemmin
+ * @author laim0nas100
  */
 public abstract class ValueType<T> {
 

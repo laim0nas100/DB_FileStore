@@ -10,7 +10,12 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-    
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
     <dependencies>
         
         <!-- Source: https://mvnrepository.com/artifact/org.jdbi/jdbi3-core -->
@@ -26,6 +31,8 @@
             <version>2026.06v1</version>
             <type>jar</type>
         </dependency>
+        
+        <!--TEST-->
         <dependency>
             <groupId>com.github.laim0nas100.Commons</groupId>
             <artifactId>commonslb-io</artifactId>
@@ -40,8 +47,6 @@
             <scope>test</scope>
             <type>jar</type>
         </dependency>
-        
-        <!-- SQLite JDBC -->
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>

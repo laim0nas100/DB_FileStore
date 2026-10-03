@@ -16,8 +16,8 @@ public class ResourceFull extends ResourceMetadata {
     public ResourceFull() {
     }
 
-    public ResourceFull(Object id, String uri, String name, String description, String mimeType, String additional_info, long size, byte[] content) {
-        super(id, uri, name, description, mimeType, additional_info, size);
+    public ResourceFull(Object id, String uri, String name, String description, String mimeType, boolean text, String additional_info, long size, byte[] content) {
+        super(id, uri, name, description, mimeType, text, additional_info, size);
         this.content = content;
     }
 

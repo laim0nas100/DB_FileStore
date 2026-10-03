@@ -29,6 +29,7 @@ public class SqliteFileStore extends JdbiFileStoreDB {
                 + "    name                TEXT,\n"
                 + "    description         TEXT,\n"
                 + "    mime_type           TEXT,\n"
+                + "    text                INTEGER NOT NULL,\n"
                 + "    additional_info     TEXT,\n"
                 + "    size                INTEGER NOT NULL,\n"
                 + "\n"

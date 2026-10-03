@@ -37,7 +37,7 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
     @Override
     public SafeOpt<List<ResourceMetadata>> getAll() {
         return safeHandle(handle -> {
-            return handle.createQuery(formatted("SELECT id,uri,name,description,mime_type,additional_info,size FROM %s ", metaName))
+            return handle.createQuery(formatted("SELECT id,uri,name,description,mime_type,text,additional_info,size FROM %s ", metaName))
                     .map((rs, ctx) -> new ResourceMetadata(rs)).list();
         });
     }
@@ -63,7 +63,7 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
                 }
             }
 
-            Query query = handle.createQuery(formatted("SELECT id,uri,name,description,mime_type,additional_info,size FROM %s ", metaName) + where.toString());
+            Query query = handle.createQuery(formatted("SELECT id,uri,name,description,mime_type,text,additional_info,size FROM %s ", metaName) + where.toString());
             if (!searchableFields.isEmpty()) {
                 for (Map.Entry<String, String> entry : searchableFields.entrySet()) {
                     query.bind(entry.getKey(), entry.getValue());
@@ -75,7 +75,7 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
     }
 
     @Override
-    public SafeOpt<List<ResourceMetadata>> searchContains( ResourceSearchableData search) {
+    public SafeOpt<List<ResourceMetadata>> searchContains(ResourceSearchableData search) {
 
         return safeHandle(handle -> {
             Map<String, String> searchableFields = search.searchableData();
@@ -102,8 +102,7 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
             }
 
             Query query = handle.createQuery(
-                    "SELECT id,uri,name,description,mime_type,"
-                    + "additional_info,size "
+                    "SELECT id,uri,name,description,mime_type,text,additional_info,size "
                     + formatted("FROM %s", metaName)
                     + where
             );
@@ -111,7 +110,7 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
             for (Map.Entry<String, String> entry : searchableFields.entrySet()) {
 
                 query.bind(entry.getKey(),
-                        "%" + escapeLike(entry.getValue()) + "%" );
+                        "%" + escapeLike(entry.getValue()) + "%");
             }
 
             return query.map((rs, ctx) -> new ResourceMetadata(rs)).list();
@@ -130,7 +129,7 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
     public SafeOpt<ResourceMetadata> find(String uri) {
 
         return safeHandle(handle -> {
-            return handle.createQuery(formatted("SELECT id,uri,name,description,mime_type,additional_info,size FROM %s WHERE uri = :uri", metaName))
+            return handle.createQuery(formatted("SELECT id,uri,name,description,mime_type,text,additional_info,size FROM %s WHERE uri = :uri", metaName))
                     .bind("uri", uri)
                     .map((rs, ctx) -> new ResourceMetadata(rs))
                     .findOne();
@@ -182,14 +181,15 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
         return safeHandle(handle -> {
             try (PreparedStatement ps = handle.getConnection()
                     .prepareStatement(
-                            formatted("INSERT INTO %s  (id, uri, name, description, mime_type, additional_info, size)", metaName)
-                            + "\n VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+                            formatted("INSERT INTO %s  (id, uri, name, description, mime_type,text, additional_info, size)", metaName)
+                            + "\n VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
                 int i = 1;
                 ps.setObject(i++, meta.getId());
                 ps.setString(i++, meta.getUri());
                 ps.setString(i++, meta.getName());
                 ps.setString(i++, meta.getDescription());
                 ps.setString(i++, meta.getMimeType());
+                ps.setBoolean(i++, meta.isText());
                 ps.setString(i++, meta.getAdditional_info());
                 ps.setLong(i++, meta.getSize());
 

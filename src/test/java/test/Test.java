@@ -83,8 +83,7 @@ public class Test {
         HikariDataSource ds = new HikariDataSource(config);
         jdbi = Jdbi.create(ds);
 
-        SqliteFileStore fs
-                = new SqliteFileStore(jdbi);
+        SqliteFileStore fs  = new SqliteFileStore(jdbi);
 
         SqliteKeyValueStore kvStore = new SqliteKeyValueStore(jdbi);
 

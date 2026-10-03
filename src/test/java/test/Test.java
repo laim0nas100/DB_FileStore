@@ -1,9 +1,9 @@
-
 package test;
 
 import com.github.laim0nas100.commonslb.Java;
 import com.github.laim0nas100.commonslb.io.autopath.AutoPath;
 import com.github.laim0nas100.dbstore.filestore.ResourceFull;
+import com.github.laim0nas100.dbstore.filestore.ResourceSearchableData;
 import com.github.laim0nas100.dbstore.filestore.SqliteFileStore;
 import com.github.laim0nas100.dbstore.keystore.SqliteKeyValueStore;
 import com.github.laim0nas100.dbstore.keystore.TypedKeyValue;
@@ -24,23 +24,23 @@ public class Test {
     public static final AutoPath WORK_DIR = AutoPath.fs(Java.getUserHome(), "lb-soft", "FileDBTest");
     public static final AutoPath DB_FILE = WORK_DIR.concat("FileDatabase.db");
     public static Jdbi jdbi;
-    
-    public static String readerDump(Reader reader){
+
+    public static String readerDump(Reader reader) {
         char[] buffer = new char[1024];
         StringBuilder sb = new StringBuilder();
-        while(true){
+        while (true) {
             try {
                 int read = reader.read(buffer);
-                if(read<=0){
+                if (read <= 0) {
                     reader.close();
                     return sb.toString();
                 }
                 sb.append(buffer, 0, read);
             } catch (IOException ex) {
-                try{
+                try {
                     reader.close();
-                }catch(IOException another){
-                    
+                } catch (IOException another) {
+
                 }
                 return sb.toString();
             }
@@ -85,7 +85,7 @@ public class Test {
 
         SqliteFileStore fs
                 = new SqliteFileStore(jdbi);
-        
+
         SqliteKeyValueStore kvStore = new SqliteKeyValueStore(jdbi);
 
         ResourceFull r = new ResourceFull();
@@ -104,20 +104,24 @@ public class Test {
                 System.out.println(string);
             });
         });
-        
+
+        fs.searchContains(new ResourceSearchableData("1", null, null, null)).ifPresent(list -> {
+            System.out.println("Found contains list:" + list.size());
+        });
+
         SafeOpt<TypedKeyValue<Double>> doubleVal = kvStore.put("my-double", 1337.37);
-        
-        doubleVal.ifPresent(dv ->{
+
+        doubleVal.ifPresent(dv -> {
             SafeOpt<TypedKeyValue> got = kvStore.get(dv.getKey());
-            
-            if(dv.equals(got.get())){
+
+            if (dv.equals(got.get())) {
                 System.out.println("Got same value!");
             }
         });
-        
-        fs.search(r).ifPresent(list->{
-            System.out.println("Found list of size:"+list.size());
+
+        fs.search(r).ifPresent(list -> {
+            System.out.println("Found list of size:" + list.size());
         });
-        
+
     }
 }

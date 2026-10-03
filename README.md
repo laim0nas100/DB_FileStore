@@ -1,10 +1,12 @@
+[![](https://jitpack.io/v/laim0nas100/DB_FileStore.svg)](https://jitpack.io/#laim0nas100/DB_FileStore)
+
 # DB_FileStore
 
 A small Java persistence library for MCP-like resources and simple key-value data.
 
 ## Features
 
-* Persistent key-value storage with typed values
+* Persistent key-value storage with extendable typed values
 * Resource metadata and binary content storage
 * Simple JDBI-based API
 * Java 8 compatible

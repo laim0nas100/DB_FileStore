@@ -1,5 +1,7 @@
 package com.github.laim0nas100.dbstore.filestore;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -16,6 +18,14 @@ public class ResourceSearchableData {
     protected String additional_info;
 
     public ResourceSearchableData() {
+    }
+
+    public ResourceSearchableData(ResultSet rs) throws SQLException {
+        this(rs.getString("name"),
+                rs.getString("description"),
+                rs.getString("mime_type"),
+                rs.getString("additional_info")
+        );
     }
 
     public ResourceSearchableData(String name, String description, String mimeType, String additional_info) {

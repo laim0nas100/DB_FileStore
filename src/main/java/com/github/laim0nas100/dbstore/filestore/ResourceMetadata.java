@@ -1,5 +1,7 @@
 package com.github.laim0nas100.dbstore.filestore;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.Objects;
 
@@ -14,6 +16,13 @@ public class ResourceMetadata extends ResourceSearchableData {
     protected long size;
 
     public ResourceMetadata() {
+    }
+
+    public ResourceMetadata(ResultSet rs) throws SQLException {
+        super(rs);
+        this.id = rs.getObject("id");
+        this.uri = rs.getString("uri");
+        this.size = rs.getLong("size");
     }
 
     public ResourceMetadata(Object id, String uri, String name, String description, String mimeType, String additional_info, long size) {

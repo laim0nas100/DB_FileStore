@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,15 +38,7 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
     public SafeOpt<List<ResourceMetadata>> getAll() {
         return safeHandle(handle -> {
             return handle.createQuery(formatted("SELECT id,uri,name,description,mime_type,additional_info,size FROM %s ", metaName))
-                    .map((rs, ctx) -> new ResourceMetadata(
-                            rs.getObject("id"),
-                            rs.getString("uri"),
-                            rs.getString("name"),
-                            rs.getString("description"),
-                            rs.getString("mime_type"),
-                            rs.getString("additional_info"),
-                            rs.getLong("size")
-                    )).list();
+                    .map((rs, ctx) -> new ResourceMetadata(rs)).list();
         });
     }
 
@@ -77,28 +68,17 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
                 for (Map.Entry<String, String> entry : searchableFields.entrySet()) {
                     query.bind(entry.getKey(), entry.getValue());
                 }
-
             }
 
-            return query.map((rs, ctx) -> new ResourceMetadata(
-                    rs.getObject("id"),
-                    rs.getString("uri"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getString("mime_type"),
-                    rs.getString("additional_info"),
-                    rs.getLong("size")
-            )).list();
+            return query.map((rs, ctx) -> new ResourceMetadata(rs)).list();
         }, search);
     }
 
     @Override
-    public SafeOpt<List<ResourceMetadata>> searchContains(
-            ResourceSearchableData search) {
+    public SafeOpt<List<ResourceMetadata>> searchContains( ResourceSearchableData search) {
 
         return safeHandle(handle -> {
-            Map<String, String> searchableFields
-                    = search.searchableData();
+            Map<String, String> searchableFields = search.searchableData();
 
             StringBuilder where = new StringBuilder();
 
@@ -107,23 +87,17 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
 
                 boolean first = true;
 
-                for (Map.Entry<String, String> entry: searchableFields.entrySet()) {
+                for (Map.Entry<String, String> entry : searchableFields.entrySet()) {
+
+                    String n = entry.getKey();
 
                     if (!first) {
                         where.append(" AND ");
+                    } else {
+                        first = false;
                     }
+                    where.append(formatted("%s LIKE :%s ESCAPE '\\'", n, n));
 
-                    String name = entry.getKey();
-
-                    where.append(
-                            formatted(
-                                    "%s LIKE :%s ESCAPE '\\'",
-                                    name,
-                                    name
-                            )
-                    );
-
-                    first = false;
                 }
             }
 
@@ -136,21 +110,11 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
 
             for (Map.Entry<String, String> entry : searchableFields.entrySet()) {
 
-                query.bind(
-                        entry.getKey(),
-                        "%" + escapeLike(entry.getValue()) + "%"
-                );
+                query.bind(entry.getKey(),
+                        "%" + escapeLike(entry.getValue()) + "%" );
             }
 
-            return query.map((rs, ctx) -> new ResourceMetadata(
-                    rs.getObject("id"),
-                    rs.getString("uri"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getString("mime_type"),
-                    rs.getString("additional_info"),
-                    rs.getLong("size")
-            )).list();
+            return query.map((rs, ctx) -> new ResourceMetadata(rs)).list();
 
         }, search);
     }
@@ -168,15 +132,7 @@ public abstract class JdbiFileStoreDB implements FileStoreDB, JdbiMixin {
         return safeHandle(handle -> {
             return handle.createQuery(formatted("SELECT id,uri,name,description,mime_type,additional_info,size FROM %s WHERE uri = :uri", metaName))
                     .bind("uri", uri)
-                    .map((rs, ctx) -> new ResourceMetadata(
-                            rs.getObject("id"),
-                            rs.getString("uri"),
-                            rs.getString("name"),
-                            rs.getString("description"),
-                            rs.getString("mime_type"),
-                            rs.getString("additional_info"),
-                            rs.getLong("size")
-                    ))
+                    .map((rs, ctx) -> new ResourceMetadata(rs))
                     .findOne();
         }, uri).flatMapOpt(f -> f);
 

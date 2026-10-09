@@ -28,7 +28,7 @@ public class MultiSqliteCounter implements JdbiMixin {
         initialize();
     }
 
-    public void initialize() throws SQLException {
+    protected void initialize() throws SQLException {
 
         safeHandle(h -> {
             if (!tableExists(h.getConnection(), counterTableName)) {
@@ -39,7 +39,7 @@ public class MultiSqliteCounter implements JdbiMixin {
 
     }
 
-    public String getCreateTableString() {
+    protected String getCreateTableString() {
         return formatted("CREATE TABLE %s(\n", counterTableName)
                 + "   tableID TEXT NOT NULL,\n"
                 + "   counter INTEGER NOT NULL,\n \n"

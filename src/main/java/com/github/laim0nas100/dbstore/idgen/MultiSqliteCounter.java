@@ -16,15 +16,22 @@ public class MultiSqliteCounter implements JdbiMixin {
 
     protected final String counterTableName;
 
+    protected final String counterIdCol;
+    protected final String counterValCol;
+
     protected final Jdbi jdbi;
+    
+    protected int increment = 100;
 
     public MultiSqliteCounter(Jdbi jdbi) throws SQLException {
-        this(jdbi, SqliteCacheCounter.DEFAULT_TABLE_NAME);
+        this(jdbi, SqliteCacheCounter.DEFAULT_TABLE_NAME, SqliteCacheCounter.DEFAULT_TABLE_COL_1, SqliteCacheCounter.DEFAULT_TABLE_COL_2);
     }
 
-    public MultiSqliteCounter(Jdbi jdbi, String counterTableName) throws SQLException {
+    public MultiSqliteCounter(Jdbi jdbi, String counterTableName, String counterIdCol, String counterValCol) throws SQLException {
         this.jdbi = Objects.requireNonNull(jdbi);
         this.counterTableName = Objects.requireNonNull(counterTableName);
+        this.counterIdCol = Objects.requireNonNull(counterIdCol);
+        this.counterValCol = Objects.requireNonNull(counterValCol);
         initialize();
     }
 
@@ -41,9 +48,9 @@ public class MultiSqliteCounter implements JdbiMixin {
 
     protected String getCreateTableString() {
         return formatted("CREATE TABLE %s(\n", counterTableName)
-                + "   tableID TEXT NOT NULL,\n"
-                + "   counter INTEGER NOT NULL,\n \n"
-                + "   PRIMARY KEY (tableID)"
+                + formatted("   %s TEXT NOT NULL,\n", counterIdCol)
+                + formatted("   %s INTEGER NOT NULL,\n \n", counterValCol)
+                + formatted("   PRIMARY KEY (%s)", counterIdCol)
                 + ");";
     }
 
@@ -52,7 +59,7 @@ public class MultiSqliteCounter implements JdbiMixin {
     }
 
     protected IdGenerator createGenerator(String id) {
-        return new SqliteCacheCounter(getJdbi(), counterTableName, SqliteCacheCounter.DEFAULT_TABLE_COL_1, SqliteCacheCounter.DEFAULT_TABLE_COL_2, id, 100L);
+        return new SqliteCacheCounter(getJdbi(), counterTableName, counterIdCol, counterValCol, id, increment);
     }
 
     @Override

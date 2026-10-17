@@ -18,13 +18,17 @@ public class TableDefinition {
     public final List<TableColumnDefinition> columns;
 
     public final Map<String, TableColumnDefinition> columnMap;
+    
+    private final int[] indexArray;
 
     public TableDefinition(String tableName, List<TableColumnDefinition> columns) {
         this.tableName = Objects.requireNonNull(tableName);
         Objects.requireNonNull(columns);
         LinkedHashMap<String, TableColumnDefinition> map = new LinkedHashMap();
+        this.indexArray = new int[columns.size()];
         for (int i = 0; i < columns.size(); i++) {
             TableColumnDefinition col = columns.get(i);
+            indexArray[i] = i;
             if (col == null) {
                 throw new IllegalArgumentException("Null column at index:" + i);
             }
@@ -124,6 +128,9 @@ public class TableDefinition {
         StringBuilder sb = new StringBuilder();
         sb.append(" (");
         boolean first = true;
+        if(columns.length == 0){
+            columns = indexArray;
+        }
         for (int index : columns) {
             TableColumnDefinition col = getCol(index);
             if (first) {
@@ -141,6 +148,9 @@ public class TableDefinition {
         StringBuilder sb = new StringBuilder();
         sb.append(" (");
         boolean first = true;
+        if(columns.length == 0){
+            columns = this.columns.stream().toArray(s-> new String[s]);
+        }
         for (String name : columns) {
             TableColumnDefinition col = getCol(name);
             if (first) {
